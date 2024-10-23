@@ -1,6 +1,4 @@
 #include <cstdio>
-#include <cstring>
-#include <cmath>
 #include "../Stack/stack.hpp"
 #include "../Stack/stack_print.hpp"
 #include "processor.hpp"
@@ -15,7 +13,7 @@ void getReady(stack_t* stk, size_t capacity, FILE** program, const char* program
 
     stackCtor(stk, capacity);
 
-    *program = fopen(program_name, "rb");
+    *program = fopen(program_name, "r");
     if (!program) 
     {
         printf(DEBUG_OUTPUT ALERT_COL "Wrong program file\n" RESET_COL, DEBUG_OUTPUT_INFO);
@@ -27,7 +25,7 @@ void getReady(stack_t* stk, size_t capacity, FILE** program, const char* program
 
 void runProgram(stack_t* stk, FILE* program)
 {
-    if (!stk) 
+    if (!stk)
     {
         printf(DEBUG_OUTPUT ALERT_COL "Stack address in NULL\n" RESET_COL, DEBUG_OUTPUT_INFO);
         return;
@@ -39,84 +37,72 @@ void runProgram(stack_t* stk, FILE* program)
         return;
     }
     
-    char cmd[15] = {};
+    int cmd;
     stack_el_t a = 0, b = 0, x = 0;
     
     while (true)
     { 
-        fscanf(program, "%s", cmd);
+        fscanf(program, "%d", &cmd);
         
-        if (strcmp(cmd, "push") == 0) 
+        switch (cmd)
         {
-            fscanf(program, STK_EL_FORM_SPEC, &x);
-            stackPush(stk, x);
-            continue;
-        } 
-        if (strcmp(cmd, "add") == 0)
-        {
-            stackPop(stk, &a);
-            stackPop(stk, &b);
-            stackPush(stk, a + b);
-            continue;
-        }
-        if (strcmp(cmd, "sub") == 0)
-        {
-            stackPop(stk, &a);
-            stackPop(stk, &b);
-            stackPush(stk, b - a);
-            continue;
-        }
-        if (strcmp(cmd, "mult") == 0)
-        {
-            stackPop(stk, &a);
-            stackPop(stk, &b);
-            stackPush(stk, a * b);
-            continue;
-        }
-        if (strcmp(cmd, "div") == 0)
-        {
-            stackPop(stk, &a);
-            stackPop(stk, &b);
-            stackPush(stk, b / a);
-            continue;
-        }
-        if (strcmp(cmd, "out") == 0)
-        {
-            stackPop(stk, &x);
-            printf("Stack element is " STK_EL_FORM_SPEC "\n", x);
-            continue;
-        }
-        if (strcmp(cmd, "sqrt") == 0)
-        {
-            stackPop(stk, &x);
-            if (x > 0) {
-                stackPush(stk, sqrt(x));
-            } 
-            else {
-                printf(ALERT_COL "You can\'t take square root of negative numbers\n" RESET_COL);
+            case CMD_PUSH:
+            {
+                fscanf(program, STK_EL_FORM_SPEC, &x);
+                stackPush(stk, x);
+                continue;
             }
-            continue;
+            case CMD_ADD:
+            {
+                stackPop(stk, &a);
+                stackPop(stk, &b);
+                stackPush(stk, a + b);
+                continue;
+            }
+            case CMD_SUB:
+            {
+                stackPop(stk, &a);
+                stackPop(stk, &b);
+                stackPush(stk, b - a);
+                continue;
+            }
+            case CMD_MUL:
+            {
+                stackPop(stk, &a);
+                stackPop(stk, &b);
+                stackPush(stk, a * b);
+                continue;
+            }
+            case CMD_DIV:
+            {
+                stackPop(stk, &a);
+                stackPop(stk, &b);
+                stackPush(stk, b / a);
+                continue;
+            }
+            case CMD_IN:
+            {
+                scanf(STK_EL_FORM_SPEC, &x);
+                stackPush(stk, x);
+                continue;
+            }
+            case CMD_OUT:
+            {
+                stackPop(stk, &x);
+                printf("Stack element is " STK_EL_FORM_SPEC "\n", x);
+                continue;
+            }
+            case CMD_DUMP:
+            {
+                STACK_DUMP(stk, SUCCESS);
+                continue;
+            }
+            case CMD_HLT:
+            {
+                break;
+            }
         }
-        if (strcmp(cmd, "sin") == 0)
-        {
-            stackPop(stk, &x);
-            stackPush(stk, sin(x));
-            continue;
-        }
-        if (strcmp(cmd, "cos") == 0)
-        {
-            stackPop(stk, &x);
-            stackPush(stk, cos(x));
-            continue;
-        }
-        if (strcmp(cmd, "dump") == 0) {
-            STACK_DUMP(stk, SUCCESS);
-            continue;
-        }
-
-        if (strcmp(cmd, "halt") == 0) {
-            break;
-        }
+        break;
     }
 }
 
